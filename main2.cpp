@@ -21,40 +21,40 @@ vector<string> creerDictionnaire() {
 void affichePendu(const unsigned etat) {
     switch(etat) {
     case 0:
-        cout << endl;;
+        cout << "Premiere tentative, c'est parti !" << endl;
         break;
     case 1:
-        cout << "_";
+        cout << "Il vous reste 11 tentatives" << endl;
         break;
     case 2:
-        cout << "  |   " << endl << "_____" << endl;
+        cout << "Il vous reste 10 tentatives" << endl;
         break;
     case 3:
-        cout << "  ___" << endl << "  |   " << endl << "_____" << endl;
+        cout << "Il vous reste 9 tentatives" << endl;
         break;
     case 4:
-        cout << "etat 4" << endl;
+        cout << "Il vous reste 8 tentatives" << endl;
         break;
     case 5:
-        cout << "etat 5" << endl;
+        cout << "Il vous reste... 7 tentatives..." << endl;
         break;
     case 6:
-        cout << "etat 6" << endl;
+        cout << "Plus que 6 tentatives, vous avez deja épuisé la moitié !" << endl;
         break;
     case 7:
-        cout << "etat 7" << endl;
+        cout << "Plus que 5 tentatives" << endl;
         break;
     case 8:
-        cout << "etat 8" << endl;
+        cout << "Plus. Que. 4. Tentatives." << endl;
         break;
     case 9:
-        cout << "etat 9" << endl;
+        cout << "PLUS QUE 3 TENTATIVES" << endl;
         break;
     case 10:
-        cout << "etat 10" << endl;
+        cout << "IL RESTE 2 TENTATIVES !!" << endl;
         break;
     case 11:
-        cout << "etat 11" << endl;
+        cout << "!! PLUS QU'UNE TENTATIVE !!" << endl;
         break;
     default:
         cout << "Il y a un problème..." << endl;
@@ -120,8 +120,7 @@ vector<char> lettrePerduAjout(vector<char> lettresPerdu, char lettre) {
     return lettresPerdu;
 }
 
-int main()
-{
+unsigned JeuDuPendu() {
     // variable pour les lettres découvertes
     vector<char> lettresDecouvertes;
     vector<char> lettresPerdu;
@@ -133,7 +132,7 @@ int main()
     vector<string> dictionnaire = creerDictionnaire();
 
     // configuration du random
-    srand(time(NULL));
+    srand(13);
 
     // mot aléatoire
     unsigned N = 0 + rand() % (dictionnaire.size() - 0);
@@ -188,5 +187,53 @@ int main()
             break;
         }
     }
+
+    unsigned points = 0;
+    if(etat != 11) points = (11 - etat)*100;
+    else points = (lettresDecouvertes.size()*11/mot.size())*10;
+    return points;
+}
+
+vector<unsigned> GagnePerd(unsigned e1, unsigned e2) {
+    cout << "L'equipe " << e1 << " joue !";
+    unsigned e1points = JeuDuPendu();
+    cout << "L'equipe " << e2 << " joue !";
+    unsigned e2points = JeuDuPendu();
+    unsigned gagnant;
+    unsigned perdant;
+    if(e1points > e2points) {
+        gagnant = e1;
+        perdant = e2;
+    }
+    else if(e1points < e2points) {
+        gagnant = e2;
+        perdant = e1;
+    }
+    else return GagnePerd(e1, e2);
+    return {gagnant, perdant};
+}
+
+signed Arbre(vector<unsigned> equipes) {
+    if(equipes.size() > 2) {
+        vector<unsigned> nouvellesEquipes;
+        for(unsigned i = 0; i < equipes.size(); i = i+2) {
+            vector<unsigned> resultat = GagnePerd(equipes[i], equipes[i+1]);
+            nouvellesEquipes.push_back(resultat[0]);
+            cout << "Bravo a l'equipe " << resultat[0] << endl;
+            cout << "Dommage pour " << resultat[1] << endl;
+        }
+        return Arbre(nouvellesEquipes);
+    } else if(equipes.size() == 2) return GagnePerd(equipes[0], equipes[1])[0];
+    else {
+        cout << "Il y a un probleme" << endl;
+        return -1;
+    }
+}
+
+int main()
+{
+    vector<unsigned> liste = {1,2,3,4};
+    unsigned points = Arbre(liste);
+    cout << points << endl;
     return 0;
 }
