@@ -191,14 +191,20 @@ unsigned JeuDuPendu() {
     return points;
 }
 
-vector<unsigned> GagnePerd(unsigned e1, unsigned e2) {
-    cout << endl << "Equipe " << e1 << " contre " << e2 << " !" << endl;
-    cout << "L'equipe " << e1 << " joue !" << endl;
+struct equipe {
+    signed nombre;
+    string nom;
+    string prenom;
+};
+
+vector<equipe> GagnePerd(equipe e1, equipe e2) {
+    cout << endl << "Equipe " << e1.nombre << " contre " << e2.nombre << " !" << endl;
+    cout << "L'equipe " << e1.nombre << " joue !" << endl;
     unsigned e1points = 2;
-    cout << "L'equipe " << e2 << " joue !" << endl;
+    cout << "L'equipe " << e2.nombre << " joue !" << endl;
     unsigned e2points = 1;
-    unsigned gagnant;
-    unsigned perdant;
+    equipe gagnant;
+    equipe perdant;
     if(e1points > e2points) {
         gagnant = e1;
         perdant = e2;
@@ -211,81 +217,81 @@ vector<unsigned> GagnePerd(unsigned e1, unsigned e2) {
     return {gagnant, perdant};
 }
 
-vector<signed> Arbre(vector<unsigned> equipes, bool bracket, vector<unsigned> equipesPerdus = {}) {
+vector<equipe> Arbre(vector<equipe> equipes, bool bracket, vector<equipe> equipesPerdus = {}) {
     if(equipes.size() > 2) {
-        vector<unsigned> nouvellesEquipesPerdus;
-        vector<unsigned> nouvellesEquipes;
+        vector<equipe> nouvellesEquipesPerdus;
+        vector<equipe> nouvellesEquipes;
         // on introduit les equipes
         cout << endl << endl << equipes.size() << " equipes vont s'affronter !" << endl;
         for(unsigned i = 0; i < equipes.size(); i = i+2) {
-            cout << equipes[i] << " contre " << equipes[i+1] << ((i < equipes.size()) ? ", " : "");
+            cout << equipes[i].nombre << " contre " << equipes[i+1].nombre << ((i < equipes.size()) ? ", " : "");
         }
         cout << endl;
 
         // on commence les combats entre les equipes gagnantes du précédent round
         for(unsigned i = 0; i < equipes.size(); i = i+2) {
-            vector<unsigned> resultat = GagnePerd(equipes[i], equipes[i+1]);
+            vector<equipe> resultat = GagnePerd(equipes[i], equipes[i+1]);
             nouvellesEquipes.push_back(resultat[0]);
             if(bracket) nouvellesEquipesPerdus.push_back(resultat[1]);
-            cout << "Bravo a l'equipe " << resultat[0] << " !" << endl;
-            cout << "Dommage pour " << resultat[1] << " :/" << endl;
+            cout << "Bravo a l'equipe " << resultat[0].nombre << " !" << endl;
+            cout << "Dommage pour " << resultat[1].nombre << " :/" << endl;
         }
 
         if(bracket) {
             cout << endl << endl << equipesPerdus.size() << " equipes vont s'affronter en bracket !" << endl;
             for(unsigned i = 0; i < equipesPerdus.size(); i = i+2) {
-                cout << equipesPerdus[i] << " contre " << equipesPerdus[i+1] << ((i < equipesPerdus.size()) ? ", " : "");
+                cout << equipesPerdus[i].nombre << " contre " << equipesPerdus[i+1].nombre << ((i < equipesPerdus.size()) ? ", " : "");
             }
             cout << endl;
 
             // on commence les combats entre les equipes perdantes en bracket
             for(unsigned i = 0; i < equipesPerdus.size(); i = i+2) {
-                vector<unsigned> resultat = GagnePerd(equipesPerdus[i], equipesPerdus[i+1]);
+                vector<equipe> resultat = GagnePerd(equipesPerdus[i], equipesPerdus[i+1]);
                 nouvellesEquipesPerdus.push_back(resultat[0]);
-                cout << "Bravo a l'equipe " << resultat[0] << " en bracket !" << endl;
-                cout << "Dommage pour " << resultat[1] << " qui disparait dans un epais trou noir :/" << endl;
+                cout << "Bravo a l'equipe " << resultat[0].nombre << " en bracket !" << endl;
+                cout << "Dommage pour " << resultat[1].nombre << " qui disparait dans un epais trou noir :/" << endl;
             }
         }
 
         // on fini en donnant le resultat et en renvoyant dans cette même fonction par récurrence
         // on déclare notre variable pour savoir qui a gagné
-        vector<signed> resultat;
+        vector<equipe> resultat;
         // si on a un bracket
         if(bracket) resultat = Arbre(nouvellesEquipes, bracket, nouvellesEquipesPerdus);
         // si on a pas de bracket
         else resultat = Arbre(nouvellesEquipes, bracket);
         // on donne le resultat
-        vector<signed> nouveauResultat = {resultat[0], resultat[1]};
+        vector<equipe> nouveauResultat = {resultat[0], resultat[1]};
         return nouveauResultat;
     } else if(equipes.size() == 2) {
         if(bracket) {
             while(equipesPerdus.size() > 1) {
                 cout << endl << endl << equipesPerdus.size() << " equipes vont s'affronter en bracket !" << endl;
                 for(unsigned i = 0; i < equipesPerdus.size(); i = i+2) {
-                    cout << equipesPerdus[i] << " contre " << equipesPerdus[i+1] << ((i < equipesPerdus.size()) ? ", " : "");
+                    cout << equipesPerdus[i].nombre << " contre " << equipesPerdus[i+1].nombre << ((i < equipesPerdus.size()) ? ", " : "");
                 }
                 cout << endl;
 
                 // on commence les combats entre les equipes perdantes en bracket
                 for(unsigned i = 0; i < equipesPerdus.size(); i = i+2) {
-                    vector<unsigned> resultat = GagnePerd(equipesPerdus[i], equipesPerdus[i+1]);
+                    vector<equipe> resultat = GagnePerd(equipesPerdus[i], equipesPerdus[i+1]);
                     unsigned pos = 0;
-                    while(equipesPerdus[pos] != equipesPerdus[1]) ++pos;
+                    while(equipesPerdus[pos].nombre != equipesPerdus[1].nombre) ++pos;
                     equipesPerdus.erase(equipesPerdus.begin()+pos);
-                    cout << "Bravo a l'equipe " << resultat[0] << " en bracket !" << endl;
-                    cout << "Dommage pour " << resultat[1] << " qui disparait dans un epais trou noir :/" << endl;
+                    cout << "Bravo a l'equipe " << resultat[0].nombre << " en bracket !" << endl;
+                    cout << "Dommage pour " << resultat[1].nombre << " qui disparait dans un epais trou noir :/" << endl;
                 }
             }
         }
         // cas special, on est a la finale, il ne reste que 2 equipes
         cout << endl << endl << "Le meilleur pour la fin ! Deux equipes vont s'affronter ! Finale !" << endl;
-        cout << "Equipe 1 : " << equipes[0] << ", Equipe 2 : " << equipes[1] << endl;
-        signed res = GagnePerd(equipes[0], equipes[1])[0];
+        cout << "Equipe 1 : " << equipes[0].nombre << ", Equipe 2 : " << equipes[1].nombre << endl;
+        equipe res = GagnePerd(equipes[0], equipes[1])[0];
         return {res, equipesPerdus[0]};
     } else {
         // cas special, un problème est survenu, on a surrement 0 équipes restantes, ce qui est impossible
         cout << "Il y a un probleme" << endl;
-        return {-1, -1};
+        return {equipe{-1, "",""}, equipe{-1, "",""}};
     }
 }
 
@@ -295,10 +301,10 @@ int main()
     srand(13);
 
     // liste des joueurs
-    vector<unsigned> liste = {1,2,3,4,5,6,7,8};
+    vector<equipe> liste = {equipe{1,"Michel","Forever"},equipe{2,"Michel","Forever"},equipe{3,"Michel","Forever"},equipe{4,"Michel","Forever"}};
 
     // équipe qui a gagné le tournois
-    vector<signed> points = Arbre(liste, true);
-    cout << "l'équipe numéro " << points[0] << " a gagne le tournois et l'equipe " << points[1] << " a gagne le bracket" << endl;
+    vector<equipe> points = Arbre(liste, true);
+    cout << "l'équipe numéro " << points[0].nombre << " a gagne le tournois et l'equipe " << points[1].nombre << " a gagne le bracket" << endl;
     return 0;
 }
