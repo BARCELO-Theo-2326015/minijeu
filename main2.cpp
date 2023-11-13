@@ -4,6 +4,26 @@
 
 using namespace std;
 
+// fonctions fournies par l'enseignant pour lire un entier ou une string
+string litUneString (){
+    string uneChaine;
+    while (true){
+        getline (cin, uneChaine);
+        if ((!cin) || (uneChaine.substr(0,2) != "//")) break;
+    }
+    return uneChaine;
+}
+
+int litUnEntier (){
+    string uneChaine;
+    while (true){
+        getline (cin, uneChaine);
+        if ((!cin) || (uneChaine.substr(0,2) != "//")) break;
+    }
+    return stoi(uneChaine);
+}
+
+// fonction pour créer le dictionnaire
 vector<string> creerDictionnaire() {
     vector<string> dictionnaire;
     string nouveauMot = "";
@@ -58,7 +78,7 @@ void affichePendu(const unsigned etat) {
         break;
     default:
         cout << "Il y a un problème..." << endl;
-        break;
+            break;
     }
 }
 
@@ -191,10 +211,14 @@ unsigned JeuDuPendu() {
     return points;
 }
 
-struct equipe {
-    signed nombre;
+struct joueur {
     string nom;
     string prenom;
+};
+
+struct equipe {
+    int nombre;
+    vector<joueur> joueurs;
 };
 
 vector<equipe> GagnePerd(equipe e1, equipe e2) {
@@ -217,6 +241,10 @@ vector<equipe> GagnePerd(equipe e1, equipe e2) {
     return {gagnant, perdant};
 }
 
+void afficheEquipe(equipe uneEquipe) {
+    //for(unsigned j = 0; j<uneEquipe.joueurs.size(); ++j) cout << endl << uneEquipe.joueurs[j].nom << endl << uneEquipe.joueurs[j].prenom << endl << ",";
+}
+
 vector<equipe> Arbre(vector<equipe> equipes, bool bracket, vector<equipe> equipesPerdus = {}) {
     if(equipes.size() > 2) {
         vector<equipe> nouvellesEquipesPerdus;
@@ -224,7 +252,11 @@ vector<equipe> Arbre(vector<equipe> equipes, bool bracket, vector<equipe> equipe
         // on introduit les equipes
         cout << endl << endl << equipes.size() << " equipes vont s'affronter !" << endl;
         for(unsigned i = 0; i < equipes.size(); i = i+2) {
-            cout << equipes[i].nombre << " contre " << equipes[i+1].nombre << ((i < equipes.size()) ? ", " : "");
+            cout << equipes[i].nombre;
+                afficheEquipe(equipes[i]);
+            cout << " contre " << equipes[i+1].nombre;
+                afficheEquipe(equipes[i+1]);
+            cout << ((i < equipes.size()) ? ", " : "");
         }
         cout << endl;
 
@@ -240,7 +272,11 @@ vector<equipe> Arbre(vector<equipe> equipes, bool bracket, vector<equipe> equipe
         if(bracket) {
             cout << endl << endl << equipesPerdus.size() << " equipes vont s'affronter en bracket !" << endl;
             for(unsigned i = 0; i < equipesPerdus.size(); i = i+2) {
-                cout << equipesPerdus[i].nombre << " contre " << equipesPerdus[i+1].nombre << ((i < equipesPerdus.size()) ? ", " : "");
+                cout << equipesPerdus[i].nombre;
+                    afficheEquipe(equipesPerdus[i]);
+                cout << " contre " << equipesPerdus[i+1].nombre;
+                    afficheEquipe(equipesPerdus[i+1]);
+                cout << ((i < equipesPerdus.size()) ? ", " : "");
             }
             cout << endl;
 
@@ -268,31 +304,52 @@ vector<equipe> Arbre(vector<equipe> equipes, bool bracket, vector<equipe> equipe
             while(equipesPerdus.size() > 1) {
                 cout << endl << endl << equipesPerdus.size() << " equipes vont s'affronter en bracket !" << endl;
                 for(unsigned i = 0; i < equipesPerdus.size(); i = i+2) {
-                    cout << equipesPerdus[i].nombre << " contre " << equipesPerdus[i+1].nombre << ((i < equipesPerdus.size()) ? ", " : "");
+                    cout << equipesPerdus[i].nombre;
+                        afficheEquipe(equipesPerdus[i]);
+                    cout << " contre " << equipesPerdus[i+1].nombre;
+                        afficheEquipe(equipesPerdus[i+1]);
+                    cout << ((i < equipesPerdus.size()) ? ", " : "");
                 }
                 cout << endl;
 
+                vector<int> equipesASupprimer;
                 // on commence les combats entre les equipes perdantes en bracket
                 for(unsigned i = 0; i < equipesPerdus.size(); i = i+2) {
                     vector<equipe> resultat = GagnePerd(equipesPerdus[i], equipesPerdus[i+1]);
-                    unsigned pos = 0;
-                    while(equipesPerdus[pos].nombre != equipesPerdus[1].nombre) ++pos;
-                    equipesPerdus.erase(equipesPerdus.begin()+pos);
+                    equipesASupprimer.push_back(resultat[1].nombre);
                     cout << "Bravo a l'equipe " << resultat[0].nombre << " en bracket !" << endl;
                     cout << "Dommage pour " << resultat[1].nombre << " qui disparait dans un epais trou noir :/" << endl;
                 }
+                for(unsigned i = 0; i < equipesASupprimer.size(); ++i) {
+                    unsigned pos = 0;
+                    while(equipesPerdus[pos].nombre != equipesASupprimer[i]) ++pos;
+                    equipesPerdus.erase(equipesPerdus.begin()+pos);
+                }
+
             }
         }
         // cas special, on est a la finale, il ne reste que 2 equipes
         cout << endl << endl << "Le meilleur pour la fin ! Deux equipes vont s'affronter ! Finale !" << endl;
-        cout << "Equipe 1 : " << equipes[0].nombre << ", Equipe 2 : " << equipes[1].nombre << endl;
+
+        cout << "Equipe 1 : " << equipes[0].nombre;
+        afficheEquipe(equipes[0]);
+
+        cout << ", Equipe 2 : " << equipes[1].nombre << endl;
+        afficheEquipe(equipes[1]);
+
         equipe res = GagnePerd(equipes[0], equipes[1])[0];
-        return {res, equipesPerdus[0]};
+        if(bracket) return {res, equipesPerdus[0]};
+        else return {res, equipe{-1,vector<joueur>{}}};
     } else {
         // cas special, un problème est survenu, on a surrement 0 équipes restantes, ce qui est impossible
         cout << "Il y a un probleme" << endl;
-        return {equipe{-1, "",""}, equipe{-1, "",""}};
+        return {equipe{-1,vector<joueur>{}}, equipe{-1,vector<joueur>{}}};
     }
+}
+
+bool estPair(unsigned nb) {
+    if((nb%2) == 0) return true;
+    else return false;
 }
 
 int main()
@@ -300,11 +357,56 @@ int main()
     // configuration du random
     srand(13);
 
-    // liste des joueurs
-    vector<equipe> liste = {equipe{1,"Michel","Forever"},equipe{2,"Michel","Forever"},equipe{3,"Michel","Forever"},equipe{4,"Michel","Forever"}};
+    // liste des equipes
+    vector<equipe> liste;
+    cout << "Lancement du tournois...";
+
+    // lecture de toutes les equipes et affectation a la variable liste de type equipe
+    for (unsigned i = 0; i < 114; ++i){
+        // variables pouvant definir le joueur
+        string nom (litUneString());
+        string prenom  (litUneString());
+        int numEquipe (litUnEntier());
+
+        // definition du nouveau joueur
+        joueur nouveauJoueur{nom,prenom};
+
+        // verification si l'equipe existe deja dans la liste
+        unsigned j = 0;
+        bool trouve = false;
+        while(j<liste.size()) {
+            if(liste[j].nombre == numEquipe) {
+                liste[j].joueurs.push_back(nouveauJoueur);
+                trouve = true;
+                break;
+            }
+            ++j;
+        }
+        if(!trouve) liste.push_back(equipe{numEquipe, vector<joueur>{nouveauJoueur}});
+    }
+
+    // determiner la dernière equipe pair
+    unsigned derniereEquipePair = 0;
+    for(unsigned i = 1; i < liste.size()+1 ; ++i) {
+        bool test = true;
+        for(unsigned j = i; j > 1; j=j/2) {
+            if(!estPair(j)) test = false;
+        }
+        if(test) derniereEquipePair = i;
+    }
+
+    // resize au nombre pair
+    cout << "Resize a " << derniereEquipePair << endl;
+    liste.resize(derniereEquipePair);
+
+    // bracket ou pas
+    bool bracket = true;
 
     // équipe qui a gagné le tournois
-    vector<equipe> points = Arbre(liste, true);
-    cout << "l'équipe numéro " << points[0].nombre << " a gagne le tournois et l'equipe " << points[1].nombre << " a gagne le bracket" << endl;
+    vector<equipe> points = Arbre(liste, bracket);
+    cout << "l'equipe numero " << points[0].nombre << " a gagne le tournois :";
+    afficheEquipe(points[0]);
+    cout << "Et l'equipe " << points[1].nombre << " a gagne le bracket :" << endl;
+    afficheEquipe(points[1]);
     return 0;
 }
